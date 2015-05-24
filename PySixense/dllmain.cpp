@@ -8,11 +8,56 @@
 #include <boost/python/enum.hpp>
 #include <sixense.h>
 
+//DLL import definition
+typedef int(*dll_sixenseInit)(void);
+typedef int(*dll_sixenseExit)(void);
+typedef int(*dll_sixenseGetAllNewestData)(sixenseAllControllerData *);
+typedef int(*dll_sixenseGetFilterEnabled)(int *on_or_off);
+typedef int(*dll_sixenseGetFilterParams)(float *near_range, float *near_val, float *far_range, float *far_val);
+typedef int(*dll_sixenseGetHighPriorityBindingEnabled)(int *on_or_off);
+typedef int(*dll_sixenseGetBaseColor)(unsigned char *red, unsigned char *green, unsigned char *blue);
+typedef int(*dll_sixenseGetData)(int which, int index_back, sixenseControllerData *);
+typedef int(*dll_sixenseGetMaxBases)();
+typedef int(*dll_sixenseSetActiveBase)(int i);
+typedef int(*dll_sixenseIsBaseConnected)(int i);
+typedef int(*dll_sixenseGetMaxControllers)(void);
+typedef int(*dll_sixenseGetNumActiveControllers)();
+typedef int(*dll_sixenseIsControllerEnabled)(int which);
+typedef int(*dll_sixenseGetHistorySize)();
+typedef int(*dll_sixenseSetFilterEnabled)(int on_or_off);
+typedef int(*dll_sixenseSetFilterParams)(float near_range, float near_val, float far_range, float far_val);
+typedef int(*dll_sixenseTriggerVibration)(int controller_id, int duration_100ms, int pattern_id);
+typedef int(*dll_sixenseAutoEnableHemisphereTracking)(int which_controller);
+typedef int(*dll_sixenseSetHighPriorityBindingEnabled)(int on_or_off);
+typedef int(*dll_sixenseSetBaseColor)(unsigned char red, unsigned char green, unsigned char blue);
+
+dll_sixenseInit HydraInit;
+dll_sixenseExit HydraExit;
+dll_sixenseGetAllNewestData HydraGetAllNewestData;
+dll_sixenseGetFilterEnabled HydraGetFilterEnabled;
+dll_sixenseGetFilterParams HydraGetFilterParams;
+dll_sixenseGetHighPriorityBindingEnabled HydraGetHighPriorityBindingEnabled;
+dll_sixenseGetBaseColor HydraGetBaseColor;
+dll_sixenseGetData HydraGetData;
+dll_sixenseGetMaxBases HydraGetMaxBases;
+dll_sixenseSetActiveBase HydraSetActiveBase;
+dll_sixenseIsBaseConnected HydraIsBaseConnected;
+dll_sixenseGetMaxControllers HydraGetMaxControllers;
+dll_sixenseGetNumActiveControllers HydraGetNumActiveControllers;
+dll_sixenseIsControllerEnabled HydraIsControllerEnabled;
+dll_sixenseGetHistorySize HydraGetHistorySize;
+dll_sixenseSetFilterEnabled HydraSetFilterEnabled;
+dll_sixenseSetFilterParams HydraSetFilterParams;
+dll_sixenseTriggerVibration HydraTriggerVibration;
+dll_sixenseAutoEnableHemisphereTracking HydraAutoEnableHemisphereTracking;
+dll_sixenseSetHighPriorityBindingEnabled HydraSetHighPriorityBindingEnabled;
+dll_sixenseSetBaseColor HydraSetBaseColor;
+
 // returns: success, on_or_off (bool)
 static boost::python::tuple GetFilterEnabled()
 {
 	int on_or_off = 0;
-	int success = sixenseGetFilterEnabled(&on_or_off);
+	int success = HydraGetFilterEnabled(&on_or_off);
 	return boost::python::make_tuple(success, on_or_off == 1);
 }
 
@@ -20,7 +65,7 @@ static boost::python::tuple GetFilterEnabled()
 static boost::python::tuple GetFilterParams()
 {
 	float near_range, near_val, far_range, far_val;
-	int success = sixenseGetFilterParams(&near_range, &near_val, &far_range, &far_val);
+	int success = HydraGetFilterParams(&near_range, &near_val, &far_range, &far_val);
 	return boost::python::make_tuple(success, near_range, near_val, far_range, far_val);
 }
 
@@ -28,7 +73,7 @@ static boost::python::tuple GetFilterParams()
 static boost::python::tuple GetHighPriorityBindingEnabled()
 {
 	int on_or_off;
-	int success = sixenseGetHighPriorityBindingEnabled(&on_or_off);
+	int success = HydraGetHighPriorityBindingEnabled(&on_or_off);
 	return boost::python::make_tuple(success, on_or_off == 1);
 }
 
@@ -36,7 +81,7 @@ static boost::python::tuple GetHighPriorityBindingEnabled()
 static boost::python::tuple GetBaseColor()
 {
 	unsigned char red, green, blue;
-	int success = sixenseGetBaseColor(&red, &green, &blue);
+	int success = HydraGetBaseColor(&red, &green, &blue);
 	return boost::python::make_tuple(success, red, green, blue);
 }
 
@@ -98,7 +143,7 @@ struct ControllerData
 static boost::python::tuple GetData(int which, int index_back)
 {
 	sixenseControllerData sixenseData;
-	int success = sixenseGetData(which, index_back, &sixenseData);
+	int success = HydraGetData(which, index_back, &sixenseData);
 	ControllerData data(sixenseData);
 	return boost::python::make_tuple(success, data);
 }
@@ -181,27 +226,27 @@ BOOST_PYTHON_MODULE(PySixense)
 		.def_readonly("which_hand", &ControllerData::which_hand)
 		;
 
-	def("Init", sixenseInit);
-	def("Exit", sixenseExit);
-	def("GetMaxBases", sixenseGetMaxBases);
-	def("SetActiveBase", sixenseSetActiveBase);
-	def("IsBaseConnected", sixenseIsBaseConnected);
-	def("GetMaxControllers", sixenseGetMaxControllers);
-	def("GetNumActiveControllers", sixenseGetNumActiveControllers);
-	def("IsControllerEnabled", sixenseIsControllerEnabled);
-	def("GetHistorySize", sixenseGetHistorySize);
-	def("SetFilterEnabled", sixenseSetFilterEnabled);
+	def("Init", HydraInit);
+	def("Exit", HydraExit);
+	def("GetMaxBases", HydraGetMaxBases);
+	def("SetActiveBase", HydraSetActiveBase);
+	def("IsBaseConnected", HydraIsBaseConnected);
+	def("GetMaxControllers", HydraGetMaxControllers);
+	def("GetNumActiveControllers", HydraGetNumActiveControllers);
+	def("IsControllerEnabled", HydraIsControllerEnabled);
+	def("GetHistorySize", HydraGetHistorySize);
+	def("SetFilterEnabled", HydraSetFilterEnabled);
 	//def("GetFilterEnabled", sixenseGetFilterEnabled);
 	def("GetFilterEnabled", GetFilterEnabled);
-	def("SetFilterParams", sixenseSetFilterParams);
+	def("SetFilterParams", HydraSetFilterParams);
 	//def("GetFilterParams", sixenseGetFilterParams);
 	def("GetFilterParams", GetFilterParams);
-	def("TriggerVibration", sixenseTriggerVibration);
-	def("AutoEnableHemisphereTracking", sixenseAutoEnableHemisphereTracking);
-	def("SetHighPriorityBindingEnabled", sixenseSetHighPriorityBindingEnabled);
+	def("TriggerVibration", HydraTriggerVibration);
+	def("AutoEnableHemisphereTracking", HydraAutoEnableHemisphereTracking);
+	def("SetHighPriorityBindingEnabled", HydraSetHighPriorityBindingEnabled);
 	//def("GetHighPriorityBindingEnabled", sixenseGetHighPriorityBindingEnabled);
 	def("GetHighPriorityBindingEnabled", GetHighPriorityBindingEnabled);
-	def("SetBaseColor", sixenseSetBaseColor);
+	def("SetBaseColor", HydraSetBaseColor);
 	//def("GetBaseColor", sixenseGetBaseColor);
 	def("GetBaseColor", GetBaseColor);
 
