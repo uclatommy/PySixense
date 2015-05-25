@@ -4,6 +4,59 @@
 #include <stdexcept>
 #include <functional>
 
+//DLL import definition
+typedef int(*dll_sixenseInit)(void);
+typedef int(*dll_sixenseExit)(void);
+typedef int(*dll_sixenseGetAllNewestData)(sixenseAllControllerData *);
+typedef int(*dll_sixenseGetFilterEnabled)(int *on_or_off);
+typedef int(*dll_sixenseGetFilterParams)(float *near_range, float *near_val, float *far_range, float *far_val);
+typedef int(*dll_sixenseGetHighPriorityBindingEnabled)(int *on_or_off);
+typedef int(*dll_sixenseGetBaseColor)(unsigned char *red, unsigned char *green, unsigned char *blue);
+typedef int(*dll_sixenseGetData)(int which, int index_back, sixenseControllerData *);
+typedef int(*dll_sixenseGetMaxBases)();
+typedef int(*dll_sixenseSetActiveBase)(int i);
+typedef int(*dll_sixenseIsBaseConnected)(int i);
+typedef int(*dll_sixenseGetMaxControllers)(void);
+typedef int(*dll_sixenseGetNumActiveControllers)();
+typedef int(*dll_sixenseIsControllerEnabled)(int which);
+typedef int(*dll_sixenseGetHistorySize)();
+typedef int(*dll_sixenseSetFilterEnabled)(int on_or_off);
+typedef int(*dll_sixenseSetFilterParams)(float near_range, float near_val, float far_range, float far_val);
+typedef int(*dll_sixenseTriggerVibration)(int controller_id, int duration_100ms, int pattern_id);
+typedef int(*dll_sixenseAutoEnableHemisphereTracking)(int which_controller);
+typedef int(*dll_sixenseSetHighPriorityBindingEnabled)(int on_or_off);
+typedef int(*dll_sixenseSetBaseColor)(unsigned char red, unsigned char green, unsigned char blue);
+typedef int(*dll_sixenseGetAllData)(int index_back, sixenseAllControllerData *);
+typedef int(*dll_sixenseGetNewestData)(int which, sixenseControllerData *);
+typedef int(*dll_sixenseSetHemisphereTrackingMode)(int which_controller, int state);
+typedef int(*dll_sixenseGetHemisphereTrackingMode)(int which_controller, int *state);
+
+dll_sixenseInit HydraInit;
+dll_sixenseExit HydraExit;
+dll_sixenseGetAllNewestData HydraGetAllNewestData;
+dll_sixenseGetFilterEnabled HydraGetFilterEnabled;
+dll_sixenseGetFilterParams HydraGetFilterParams;
+dll_sixenseGetHighPriorityBindingEnabled HydraGetHighPriorityBindingEnabled;
+dll_sixenseGetBaseColor HydraGetBaseColor;
+dll_sixenseGetData HydraGetData;
+dll_sixenseGetMaxBases HydraGetMaxBases;
+dll_sixenseSetActiveBase HydraSetActiveBase;
+dll_sixenseIsBaseConnected HydraIsBaseConnected;
+dll_sixenseGetMaxControllers HydraGetMaxControllers;
+dll_sixenseGetNumActiveControllers HydraGetNumActiveControllers;
+dll_sixenseIsControllerEnabled HydraIsControllerEnabled;
+dll_sixenseGetHistorySize HydraGetHistorySize;
+dll_sixenseSetFilterEnabled HydraSetFilterEnabled;
+dll_sixenseSetFilterParams HydraSetFilterParams;
+dll_sixenseTriggerVibration HydraTriggerVibration;
+dll_sixenseAutoEnableHemisphereTracking HydraAutoEnableHemisphereTracking;
+dll_sixenseSetHighPriorityBindingEnabled HydraSetHighPriorityBindingEnabled;
+dll_sixenseSetBaseColor HydraSetBaseColor;
+dll_sixenseGetAllData HydraGetAllData;
+dll_sixenseGetNewestData HydraGetNewestData;
+dll_sixenseSetHemisphereTrackingMode HydraSetHemisphereTrackingMode;
+dll_sixenseGetHemisphereTrackingMode HydraGetHemisphereTrackingMode;
+
 //    Helper Stuff
 
 class Defer
@@ -21,7 +74,7 @@ private:
 };
 
 //    General Wrapper Templates
-
+/*
 template< int( *func )() >
 static PyObject* wrap( PyObject* self, PyObject* arguments )
 {
@@ -66,7 +119,7 @@ static PyObject* wrapFromBool( PyObject* self, PyObject* arguments )
   }
   return PyLong_FromLong( func( argument ) );
 }
-
+*/
 namespace wrapped
 {
   //    Binding for Constants
@@ -215,7 +268,7 @@ namespace wrapped
     List()
       : m_obj(PyList_New( 0 ) )
     {
-      if( !m_obj ) throw PythonAllocError( "Failed to create Python List" );
+		if (!m_obj) throw std::runtime_error::runtime_error("Failed to create Python List");
     }
     ~List()
     {
@@ -238,7 +291,7 @@ namespace wrapped
     {
       if( PyList_Append( m_obj, obj ) != 0 )
       {
-        throw PythonAllocError( "Failed to push back!" );
+		  throw std::runtime_error::runtime_error("Failed to push back!");
       }
     }
     void push_back( float f )
@@ -327,6 +380,101 @@ namespace wrapped
     return list;
   }
 
+  static PyObject* Init(PyObject* self, PyObject* arguments)
+  {
+	  return PyLong_FromLong(HydraInit());
+  }
+
+  static PyObject* Exit(PyObject* self, PyObject* arguments)
+  {
+	  return PyLong_FromLong(HydraExit());
+  }
+
+  static PyObject* GetMaxBases(PyObject* self, PyObject* arguments)
+  {
+	  return PyLong_FromLong(HydraGetMaxBases());
+  }
+
+  static PyObject* SetActiveBase(PyObject* self, PyObject* arguments)
+  {
+	  int base_num;
+	  if (!PyArg_ParseTuple(arguments, "i", &base_num))
+	  {
+		  return nullptr;
+	  }
+	  return PyLong_FromLong(HydraSetActiveBase(base_num));
+  }
+
+  static PyObject* IsBaseConnected(PyObject* self, PyObject* arguments)
+  {
+	  int base_num;
+	  if (!PyArg_ParseTuple(arguments, "i", &base_num))
+	  {
+		  return nullptr;
+	  }
+	  return PyBool_FromLong(HydraIsBaseConnected(base_num));
+  }
+
+  static PyObject* GetMaxControllers(PyObject* self, PyObject* arguments)
+  {
+	  int num;
+	  if (!PyArg_ParseTuple(arguments, "i", &num))
+	  {
+		  return nullptr;
+	  }
+	  return PyLong_FromLong(HydraGetMaxControllers());
+  }
+
+  static PyObject* IsControllerEnabled(PyObject* self, PyObject* arguments)
+  {
+	  int which;
+	  if (!PyArg_ParseTuple(arguments, "i", &which))
+	  {
+		  return nullptr;
+	  }
+	  return PyBool_FromLong(HydraIsControllerEnabled(which));
+  }
+
+  static PyObject* GetNumActiveControllers(PyObject* self, PyObject* arguments)
+  {
+	  return PyLong_FromLong(HydraGetNumActiveControllers());
+  }
+
+  static PyObject* GetHistorySize(PyObject* self, PyObject* arguments)
+  {
+	  return PyLong_FromLong(HydraGetHistorySize());
+  }
+
+  static PyObject* AutoEnableHemisphereTracking(PyObject* self, PyObject* arguments)
+  {
+	  int which_controller;
+	  if (!PyArg_ParseTuple(arguments, "i", &which_controller))
+	  {
+		  return nullptr;
+	  }
+	  return PyLong_FromLong(HydraAutoEnableHemisphereTracking(which_controller));
+  }
+
+  static PyObject* SetHighPriorityBindingEnabled(PyObject* self, PyObject* arguments)
+  {
+	  int on_or_off;
+	  if (!PyArg_ParseTuple(arguments, "i", &on_or_off))
+	  {
+		  return nullptr;
+	  }
+	  return PyBool_FromLong(HydraSetHighPriorityBindingEnabled(on_or_off));
+  }
+
+  static PyObject* SetFilterEnabled(PyObject* self, PyObject* arguments)
+  {
+	  int on_or_off;
+	  if (!PyArg_ParseTuple(arguments, "i", &on_or_off))
+	  {
+		  return nullptr;
+	  }
+	  return PyBool_FromLong(HydraSetFilterEnabled(on_or_off));
+  }
+
   static PyObject* GetData( PyObject* self, PyObject* arguments )
   {
     int which, index_back;
@@ -335,7 +483,7 @@ namespace wrapped
       return nullptr;
     }
     sixenseControllerData data{};
-    int result = sixenseGetData( which, index_back, &data );
+    int result = HydraGetData( which, index_back, &data );
     PyObject* obj = ( result == SIXENSE_SUCCESS ) ? mkControllerData( data ) : ( Py_INCREF( Py_None ), Py_None );
     return Py_BuildValue( "(i,N)", result, obj );
   }
@@ -348,7 +496,7 @@ namespace wrapped
       return nullptr;
     }
     sixenseAllControllerData allData;
-    int result = sixenseGetAllData( index_back, &allData );
+    int result = HydraGetAllData( index_back, &allData );
     return Py_BuildValue( "(i,N)", result, result == SIXENSE_SUCCESS ? mkAllControllerData( allData ) : ( Py_INCREF( Py_None ), Py_None ) );
   }
 
@@ -360,7 +508,7 @@ namespace wrapped
       return nullptr;
     }
     sixenseControllerData data{};
-    int result = sixenseGetNewestData( which, &data );
+    int result = HydraGetNewestData( which, &data );
     PyObject* obj = ( result == SIXENSE_SUCCESS ) ? mkControllerData( data ) : ( Py_INCREF( Py_None ), Py_None );
     return Py_BuildValue( "(i,N)", result, obj );
   }
@@ -368,7 +516,7 @@ namespace wrapped
   static PyObject* GetAllNewestData( PyObject* self, PyObject* arguments )
   {
     sixenseAllControllerData allData;
-    int result = sixenseGetAllNewestData( &allData );
+    int result = HydraGetAllNewestData( &allData );
     return Py_BuildValue( "(i,N)", result, result == SIXENSE_SUCCESS ? mkAllControllerData( allData ) : ( Py_INCREF( Py_None ), Py_None ) );
   }
 
@@ -382,7 +530,7 @@ namespace wrapped
     {
       return nullptr;
     }
-    return PyLong_FromLong( sixenseSetHemisphereTrackingMode( which_controller, state ) );
+    return PyLong_FromLong( HydraSetHemisphereTrackingMode( which_controller, state ) );
   }
 
   static PyObject* GetHemisphereTrackingMode( PyObject* self, PyObject* arguments )
@@ -393,14 +541,14 @@ namespace wrapped
       return nullptr;
     }
     int state;
-    int success = sixenseGetHemisphereTrackingMode( which_controller, &state );
+    int success = HydraGetHemisphereTrackingMode( which_controller, &state );
     return Py_BuildValue( "(i,i)", success, state );
   }
 
   static PyObject* GetHighPriorityBindingEnabled( PyObject* self, PyObject* arguments )
   {
     int on_or_off;
-    int success = sixenseGetHighPriorityBindingEnabled( &on_or_off );
+    int success = HydraGetHighPriorityBindingEnabled( &on_or_off );
     return Py_BuildValue( "(i,N)", success, PyBool_FromLong( on_or_off ) );
   }
 
@@ -413,13 +561,13 @@ namespace wrapped
     {
       return nullptr;
     }
-    return PyLong_FromLong( sixenseTriggerVibration( controller_id, duration_100ms, pattern_id ) );
+    return PyLong_FromLong( HydraTriggerVibration( controller_id, duration_100ms, pattern_id ) );
   }
 
   static PyObject* GetFilterEnabled( PyObject* self, PyObject* arguments )
   {
     int on_or_off = 0;
-    int success = sixenseGetFilterEnabled( &on_or_off );
+    int success = HydraGetFilterEnabled( &on_or_off );
     return Py_BuildValue( "(i,N)", success, PyBool_FromLong( on_or_off ) );
   }
 
@@ -433,13 +581,13 @@ namespace wrapped
     {
       return nullptr;
     }
-    return PyLong_FromLong( sixenseSetFilterParams( near_range, near_val, far_range, far_val ) );
+    return PyLong_FromLong( HydraSetFilterParams( near_range, near_val, far_range, far_val ) );
   }
 
   static PyObject* GetFilterParams( PyObject* self, PyObject* arguments )
   {
     float near_range, near_val, far_range, far_val;
-    int success = sixenseGetFilterParams( &near_range, &near_val, &far_range, &far_val );
+    int success = HydraGetFilterParams( &near_range, &near_val, &far_range, &far_val );
     return Py_BuildValue( "(i,f,f,f,f)", success, near_range, near_val, far_range, far_val );
   }
 
@@ -450,13 +598,13 @@ namespace wrapped
     {
       return nullptr;
     }
-    return PyLong_FromLong( sixenseSetBaseColor( red, green, blue ) );
+    return PyLong_FromLong( HydraSetBaseColor( red, green, blue ) );
   }
 
   static PyObject* GetBaseColor( PyObject* self, PyObject* arguments )
   {
     unsigned char red, green, blue;
-    int success = sixenseGetBaseColor( &red, &green, &blue );
+    int success = HydraGetBaseColor( &red, &green, &blue );
     return Py_BuildValue( "(i,B,B,B)", success, red, green, blue );
   }
 }
@@ -464,26 +612,26 @@ namespace wrapped
 PyMODINIT_FUNC PyInit_PySixense()
 {
   static PyMethodDef methods[] = {
-      { "Init", wrap< sixenseInit >, METH_VARARGS, "PySixense.Init()\n\nInitializes the SDK. Must be successfully called before using any other function.\n\nReturns status." },
-      { "Exit", wrap< sixenseExit >, METH_VARARGS, "PySixense.Exit()\n\nMust be called once you're done with the SDK if you called Init()\n\nReturns status." },
-      { "GetMaxBases", wrap< sixenseGetMaxBases >, METH_VARARGS, "PySixense.GetMaxBases()\n\nReturns the maximum number of supported bases, currently 4." },
-      { "SetActiveBase", wrap< sixenseSetActiveBase >, METH_VARARGS, "PySixense.SetActiveBase(base_num)\n\nSets the base of the given index active (i.e. all base-related functions calls will apply to this one)\n\nReturns status" },
-      { "IsBaseConnected", wrapAsBool< sixenseIsBaseConnected >, METH_VARARGS, "PySixense.IsBaseConnected(base_num)\n\nReturns whether the base of the given index is currently connected to the PC. (False or True)" },
-      { "GetMaxControllers", wrap< sixenseGetMaxControllers >, METH_VARARGS, "PySixense.GetMaxControllers()\n\nReturns the maximum number of controllers supported (per base?)" },
-      { "IsControllerEnabled", wrapAsBool< sixenseIsControllerEnabled >, METH_VARARGS, "PySixense.IsControlledEnabled(controller_index)\n\nReturns whether the controller of the given index is enabled (False or True)" },
-      { "GetNumActiveControllers", wrap< sixenseGetNumActiveControllers >, METH_VARARGS, "PySixense.GetNumActiveControllers()\n\nReturns the number of active controlles of the active base. Use IsControllerEnabled() to find out which ones are the active ones." },
-      { "GetHistorySize", wrap< sixenseGetHistorySize >, METH_VARARGS, "PySixense.GetHistorySize()\n\nHow much previous ControllerData is available - usually 10." },
+	  { "Init", wrapped::Init, METH_VARARGS, "PySixense.Init()\n\nInitializes the SDK. Must be successfully called before using any other function.\n\nReturns status." },
+      { "Exit", wrapped::Exit, METH_VARARGS, "PySixense.Exit()\n\nMust be called once you're done with the SDK if you called Init()\n\nReturns status." },
+      { "GetMaxBases", wrapped::GetMaxBases, METH_VARARGS, "PySixense.GetMaxBases()\n\nReturns the maximum number of supported bases, currently 4." },
+      { "SetActiveBase", wrapped::SetActiveBase, METH_VARARGS, "PySixense.SetActiveBase(base_num)\n\nSets the base of the given index active (i.e. all base-related functions calls will apply to this one)\n\nReturns status" },
+      { "IsBaseConnected", wrapped::IsBaseConnected, METH_VARARGS, "PySixense.IsBaseConnected(base_num)\n\nReturns whether the base of the given index is currently connected to the PC. (False or True)" },
+      { "GetMaxControllers", wrapped::GetMaxControllers, METH_VARARGS, "PySixense.GetMaxControllers()\n\nReturns the maximum number of controllers supported (per base?)" },
+      { "IsControllerEnabled", wrapped::IsControllerEnabled, METH_VARARGS, "PySixense.IsControlledEnabled(controller_index)\n\nReturns whether the controller of the given index is enabled (False or True)" },
+      { "GetNumActiveControllers", wrapped::GetNumActiveControllers, METH_VARARGS, "PySixense.GetNumActiveControllers()\n\nReturns the number of active controlles of the active base. Use IsControllerEnabled() to find out which ones are the active ones." },
+      { "GetHistorySize", wrapped::GetHistorySize, METH_VARARGS, "PySixense.GetHistorySize()\n\nHow much previous ControllerData is available - usually 10." },
       { "GetData", wrapped::GetData, METH_VARARGS, "PySixense.GetData(controller_index, index_back)\n\nReturns status and a PySixense.ControllerData with the data from index_back polls ago (in range [0, PySixense.GetHistorySize() - 1]) for the given controller" },
       { "GetAllData", wrapped::GetAllData, METH_VARARGS, "PySixense.GetAllData(index_back)\n\nReturns status and a list containing 4 PySixense.ControllerData (one for each PySixense.GetMaxControllers()) with the data from index_back polls ago (in range [0, PySixense.GetHistorySize() - 1])" },
       { "GetNewestData", wrapped::GetNewestData, METH_VARARGS, "PySixense.GetNewestData(controller_index)\n\nReturns status and a PySixense.ControllerData with the newest data for the given controller" },
       { "GetAllNewestData", wrapped::GetAllNewestData, METH_VARARGS, "PySixense.GetAllNewestData()\n\nReturns status and a list containing 4 PySixense.ControllerData (one for each PySixense.GetMaxControllers()) with the newest data." },
-      { "SetHemisphereTrackingMode", wrapped::SetHemisphereTrackingMode, METH_VARARGS, "sixenseSetHemisphereTrackingMode(which_controller, state)" },
-      { "GetHemisphereTrackingMode", wrapped::GetHemisphereTrackingMode, METH_VARARGS, "sixenseGetHemisphereTrackingMode(int which_controller)" },
-      { "AutoEnableHemisphereTracking", wrap< sixenseAutoEnableHemisphereTracking >, METH_VARARGS, "PySixense.AutoEnableHemisphereTracking(controller_id)\n\nDeprecated, refer to the Sixense SDK Reference if you really need it." },
-      { "SetHighPriorityBindingEnabled", wrapFromBool< sixenseSetHighPriorityBindingEnabled >, METH_VARARGS, "PySixense.SetHighPriorityBindingEnabled(on_or_off)\n\nOnly for wireless devices. Refer to the Sixense SDK Reference if you need it." },
+      { "SetHemisphereTrackingMode", wrapped::SetHemisphereTrackingMode, METH_VARARGS, "PySixenseSetHemisphereTrackingMode(which_controller, state)" },
+      { "GetHemisphereTrackingMode", wrapped::GetHemisphereTrackingMode, METH_VARARGS, "PySixenseGetHemisphereTrackingMode(int which_controller)" },
+      { "AutoEnableHemisphereTracking", wrapped::AutoEnableHemisphereTracking, METH_VARARGS, "PySixense.AutoEnableHemisphereTracking(controller_id)\n\nDeprecated, refer to the Sixense SDK Reference if you really need it." },
+      { "SetHighPriorityBindingEnabled", wrapped::SetHighPriorityBindingEnabled, METH_VARARGS, "PySixense.SetHighPriorityBindingEnabled(on_or_off)\n\nOnly for wireless devices. Refer to the Sixense SDK Reference if you need it." },
       { "GetHighPriorityBindingEnabled", wrapped::GetHighPriorityBindingEnabled, METH_VARARGS, "PySixense.GetHighPriorityBindingEnabled()\n\nOnly for wireless devices. Refer to the Sixense SDK Reference if you need it. Returns a 2-tuple." },
       { "TriggerVibration", wrapped::TriggerVibration, METH_VARARGS, "PySixense.TriggerVibration(controller_id, duration_100ms, pattern_id)\n\nOn controllers that support it (not the Razer Hydra), this triggers a vibration lasting duration_100ms deciseconds. pattern_id is currently ignored.\n\nReturns status." },
-      { "SetFilterEnabled", wrapFromBool< sixenseSetFilterEnabled >, METH_VARARGS, "PySixense.SetFilterEnabled(on_or_off)\n\nEnables or disabled filtering. ( i.e.mapping movements to a certain range )\n\nReturns success." },
+      { "SetFilterEnabled", wrapped::SetFilterEnabled, METH_VARARGS, "PySixense.SetFilterEnabled(on_or_off)\n\nEnables or disabled filtering. ( i.e.mapping movements to a certain range )\n\nReturns success." },
       { "GetFilterEnabled", wrapped::GetFilterEnabled, METH_VARARGS, "PySixense.GetFilterEnabled()\n\nReturns status and whether filtering is enabled (True or False)" },
       { "SetFilterParams", wrapped::SetFilterParams, METH_VARARGS, "PySixense.SetFilterParams(near_range, near_val, far_range, far_val)\n\nPlease refer to the Sixense SDK Reference" },
       { "GetFilterParams", wrapped::GetFilterParams, METH_VARARGS, "PySixense.GetFilterParams()\n\nPlease refer to the Sixense SDK Reference. Returns a 5-tuple." },
