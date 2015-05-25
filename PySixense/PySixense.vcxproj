@@ -83,7 +83,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>D:\Developer\SixenseSDK_062612\include;C:\Python34\include;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\Developer\SixenseSDK_062612\lib\x64\release_static;C:\Python34\libs;$(LibraryPath)</LibraryPath>
+    <LibraryPath>D:\Developer\SixenseSDK_062612\lib\x64\release_dll;C:\Python34\libs;$(LibraryPath)</LibraryPath>
     <TargetExt>.pyd</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDll|x64'">
@@ -142,7 +142,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>python34.lib;sixense_s_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>python34.lib;sixense_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDll|x64'">
